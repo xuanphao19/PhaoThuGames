@@ -1,6 +1,6 @@
 ﻿//  ---------------------------------------------------------------------------------
 //  Copyright (c) Microsoft Corporation.  All rights reserved.
-//
+//https://learn.microsoft.com/en-us/samples/microsoft/windows-appsample-get-started-js2d/get-started-javascript-2d/?ns-enrollment-type=Collection&ns-enrollment-id=jg60cd0ox2z4nk
 //  The MIT License (MIT)
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -98,13 +98,13 @@ function init() {
   // First we make a list of all images that should be loaded..
   manifest = [
     {
-      src: "../images/walkingDino-SpriteSheet.png",
+      src: "./images/walkingDino-SpriteSheet.png",
       id: "dino",
     },
-    { src: "../images/barrel.png", id: "barrel" },
-    { src: "../images/fluffy-cloud-small.png", id: "cloud" },
+    { src: "./images/barrel.png", id: "barrel" },
+    { src: "./images/fluffy-cloud-small.png", id: "cloud" },
   ];
-
+  //https://xuanphao19.github.io/PhaoThuGames/
   // <img src='../' alt='' />;
 
   // Now we create a special queue, and finally a handler that is
