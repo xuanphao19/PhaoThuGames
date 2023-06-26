@@ -75,6 +75,7 @@ function init() {
 function loadingComplete() {
   // Images have been loaded at this point, so we can continue.
   // Create some clouds to drift by..
+  height = window.innerHeight;
   for (var i = 0; i < 3; i++) {
     cloud[i] = new createjs.Bitmap(loader.getResult("cloud"));
     cloud[i].x = Math.random() * 524;
@@ -84,13 +85,13 @@ function loadingComplete() {
   for (var i = 0; i < 2; i++) {
     car[i] = new createjs.Bitmap(loader.getResult("car"));
     car[i].x = Math.random() * 524;
-    car[i].y = 380 + i * 4;
+    car[i].y = height / 2 - 90 + i * 2;
     police[i] = new createjs.Bitmap(loader.getResult("police"));
     police[i].x = Math.random() * 524;
-    police[i].y = 380 + i * 4;
+    police[i].y = height / 2 - 90 + i * 2;
     fireTruck[i] = new createjs.Bitmap(loader.getResult("fireTruck"));
     fireTruck[i].x = Math.random() * 524;
-    fireTruck[i].y = 375 + i * 4;
+    fireTruck[i].y = height / 2 - 90 + i * 2;
     stage.addChild(fireTruck[i], car[i], police[i]);
   }
 
