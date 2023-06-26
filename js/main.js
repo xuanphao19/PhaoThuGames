@@ -57,7 +57,7 @@ function init() {
       src: "walkingDino-SpriteSheet.png",
       id: "dino",
     },
-    { src: "barrel.png", id: "barrel" },
+    { src: "barrell.png", id: "barrel" },
     { src: "cloud-small.png", id: "cloud" },
     { src: "car.png", id: "car" },
     { src: "police.png", id: "police" },
@@ -85,22 +85,14 @@ function loadingComplete() {
     car[i] = new createjs.Bitmap(loader.getResult("car"));
     car[i].x = Math.random() * 524;
     car[i].y = 380 + i * 4;
-    stage.addChild(car[i]);
     police[i] = new createjs.Bitmap(loader.getResult("police"));
     police[i].x = Math.random() * 524;
     police[i].y = 380 + i * 4;
-    stage.addChild(police[i]);
     fireTruck[i] = new createjs.Bitmap(loader.getResult("fireTruck"));
     fireTruck[i].x = Math.random() * 524;
-    fireTruck[i].y = 365 + i * 4;
-    stage.addChild(fireTruck[i]);
+    fireTruck[i].y = 375 + i * 4;
+    stage.addChild(fireTruck[i], car[i], police[i]);
   }
-  // for (var i = 0; i < 2; i++) {
-  //   police[i] = new createjs.Bitmap(loader.getResult("police"));
-  //   police[i].x = Math.random() * 524;
-  //   police[i].y = 380 + i * 4;
-  //   stage.addChild(police[i]);
-  // }
 
   //  Define  the animated dino walk using a spritesheet of images,
   // and also a standing still state, and a knocked-over state.
@@ -144,11 +136,7 @@ function loadingComplete() {
 
   // This code will call the method 'keyboardPressed' is the user presses a key.
   this.document.onkeydown = keyboardPressed;
-
-  // Add support for mouse clicks
   stage.on("stagemousedown", mouseClicked);
-
-  // This code makes the app call the method 'resizeGameWindow' if the user resizes the current window.
   window.addEventListener("resize", resizeGameWindow);
 }
 
@@ -209,7 +197,8 @@ function gameLoop() {
       scoreText.text = "Qua cửa: " + score.toString();
       // Move the obsticle across the screen, rolling as it goes.
       barrel.rotation = barrel.x;
-      barrel.x -= 8 + score; // The barrel moves faster the more points you have!
+      var ballSpeed = score <= 10 ? score : 5;
+      barrel.x -= 8 + ballSpeed; // The barrel moves faster the more points you have!
       if (barrel.x < 0) {
         barrel.x = width + Math.random() * 200;
         score++;
@@ -319,14 +308,13 @@ function animate_clouds() {
     if (cloud[i].x <= -1528) cloud[i].x = width;
   }
   for (var i = 0; i < 2; i++) {
-    let speed = numRandom(12, 4);
-    let speedCar = numRandom(12, 4);
-    police[i].x = police[i].x - (i + speed) * 2;
+    let speed = numRandom(16, 4);
+    police[i].x = police[i].x - (i + speed) * 0.4;
     if (police[i].x <= -128) police[i].x = width;
-    car[i].x = car[i].x - (i + speedCar) * 0.8;
-    if (car[i].x <= -128) car[i].x = width;
-    fireTruck[i].x = fireTruck[i].x - (i + speed) * 1.5;
+    fireTruck[i].x = fireTruck[i].x - (i + speed) * 0.3;
     if (fireTruck[i].x <= -228) fireTruck[i].x = width;
+    car[i].x = car[i].x - (i + speed) * 0.2;
+    if (car[i].x <= -128) car[i].x = width;
   }
   if (dino_walk.x < 1300) {
     dino_walk.x += 2;
