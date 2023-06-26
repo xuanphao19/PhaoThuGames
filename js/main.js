@@ -11,9 +11,13 @@ var width, height;
 var dino_walk, dino_stand, dino_lying;
 var sky, grass;
 var barrel,
-  cloud = [];
+  cloud = [],
+  car = [],
+  fireTruck = [],
+  police = [];
 var scoreText;
-var dy,
+var dx,
+  dy,
   score = 0,
   jumping = false;
 
@@ -43,7 +47,7 @@ function init() {
   grass.graphics.beginFill("green");
 
   // Text to display the score and other messages.
-  scoreText = new createjs.Text("Score: 00000", "42px Arial", "#ffffff");
+  scoreText = new createjs.Text("Score: 00000", "42px Arial", "violet");
 
   // Add these objects to the stage so they are visible.
   stage.addChild(sky, grass, scoreText);
@@ -55,7 +59,10 @@ function init() {
     },
     { src: "barrel.png", id: "barrel" },
     { src: "cloud-small.png", id: "cloud" },
-    // <img src='../' alt='' />;
+    { src: "car.png", id: "car" },
+    { src: "police.png", id: "police" },
+    { src: "fireTruck.png", id: "fireTruck" },
+    // <img src='../' alt='' fireTruck/>;
   ];
 
   // Now we create a special queue, and finally a handler that is
@@ -70,11 +77,32 @@ function loadingComplete() {
   // Create some clouds to drift by..
   for (var i = 0; i < 3; i++) {
     cloud[i] = new createjs.Bitmap(loader.getResult("cloud"));
-    cloud[i].x = Math.random() * 1524;
-    cloud[i].y = 24 + i * 48;
+    cloud[i].x = Math.random() * 524;
+    cloud[i].y = 64 + i * 18;
     stage.addChild(cloud[i]);
   }
-  // Define the animated dino walk using a spritesheet of images,
+  for (var i = 0; i < 2; i++) {
+    car[i] = new createjs.Bitmap(loader.getResult("car"));
+    car[i].x = Math.random() * 524;
+    car[i].y = 380 + i * 4;
+    stage.addChild(car[i]);
+    police[i] = new createjs.Bitmap(loader.getResult("police"));
+    police[i].x = Math.random() * 524;
+    police[i].y = 380 + i * 4;
+    stage.addChild(police[i]);
+    fireTruck[i] = new createjs.Bitmap(loader.getResult("fireTruck"));
+    fireTruck[i].x = Math.random() * 524;
+    fireTruck[i].y = 365 + i * 4;
+    stage.addChild(fireTruck[i]);
+  }
+  // for (var i = 0; i < 2; i++) {
+  //   police[i] = new createjs.Bitmap(loader.getResult("police"));
+  //   police[i].x = Math.random() * 524;
+  //   police[i].y = 380 + i * 4;
+  //   stage.addChild(police[i]);
+  // }
+
+  //  Define  the animated dino walk using a spritesheet of images,
   // and also a standing still state, and a knocked-over state.
   var data = {
     images: [loader.getResult("dino")],
@@ -125,15 +153,8 @@ function loadingComplete() {
 }
 
 function resizeGameWindow() {
-  // Get the current width and height of the view, and resize and position everything accordingly.
-  // This method is also called once at the start of the app to put everything in an initial position.
   width = window.innerWidth;
-  //     Windows.UI.ViewManagement.ApplicationView.getForCurrentView().visibleBounds
-  //       .width;
   height = window.innerHeight;
-  //     Windows.UI.ViewManagement.ApplicationView.getForCurrentView().visibleBounds
-  //       .height;
-
   canvas.width = width;
   canvas.height = height;
   stage.setBounds(0, 0, width, height);
@@ -196,21 +217,20 @@ function gameLoop() {
 
       // Handle moving the dino up and down if the player is making it jump.
       jumpingDino();
-
       // Very simple check for collision between dino and barrel
-      if (barrel.x > 220 && barrel.x < 380 && !jumping) {
-        barrel.x = 380;
-        GameState = GameStateEnum.GameOver;
-      }
+      // if (barrel.x > 220 && barrel.x < 380 && !jumping) {
+      //   barrel.x = 380;
+      //   GameState = GameStateEnum.GameOver;
+      // }
       break;
     }
-    case GameStateEnum.GameOver: {
-      dino_walk.visible = false;
-      dino_lying.visible = true;
-      scoreText.x = width / 2 - 220;
-      scoreText.text = "Thôi chết em rồi. Cửa tử: " + score.toString();
-      break;
-    }
+    // case GameStateEnum.GameOver: {
+    // dino_walk.visible = false;
+    // dino_lying.visible = true;
+    // scoreText.x = width / 2 - 220;
+    // scoreText.text = "Thôi chết em rồi. Cửa tử: " + score.toString();
+    // break;
+    // }
   }
   animate_clouds();
   // Redraw all the object in new positions.
@@ -237,14 +257,47 @@ function jumpingDino() {
 function mouseClicked() {
   userDidSomething();
 }
+
 function keyboardPressed(event) {
-  if (event.keyCode == 32) userDidSomething();
+  if (event.keyCode == 32) {
+    if (GameState == GameStateEnum.Ready) {
+      GameState = GameStateEnum.Playing;
+    }
+    if (GameState == GameStateEnum.GameOver) {
+      GameState = GameStateEnum.Ready;
+    }
+    userDidSomething();
+  }
+  // if (event.keyCode == 32) {
+  // }
+  // if (event.keyCode == 32) {
+  //   if (dino_walk.x < 1300) {
+  //     dino_walk.x += 20;
+  //   } else {
+  //     dino_walk.x = 20;
+  //   }
+  // }
+  if (event.keyCode == 37) {
+    if (dino_walk.x > 20) {
+      dino_walk.x -= 20;
+    } else {
+      dino_walk.x = 20;
+    }
+  }
 }
+
+const dinoAudio = document.querySelector("audio");
+
 function userDidSomething() {
   // This is called when the user either clicks with the mouse, or presses the Space Bar.
+  if (score >= 40) {
+    window.location.reload();
+  }
+
   if (GameState === GameStateEnum.Playing) {
     if (jumping == false) {
       jumping = true;
+      dinoAudio.play();
       dy = -32;
     }
   }
@@ -255,10 +308,29 @@ function userDidSomething() {
     GameState = GameStateEnum.Ready;
   }
 }
-
+const numRandom = function (a, b) {
+  return b
+    ? Math.floor(Math.random() * (a - b) + b)
+    : Math.floor(Math.random() * a);
+};
 function animate_clouds() {
   for (var i = 0; i < 3; i++) {
-    cloud[i].x = cloud[i].x - (i + 1) * 0.2;
-    if (cloud[i].x <= -1228) cloud[i].x = width + 128;
+    cloud[i].x = cloud[i].x - i * `0.${i}`;
+    if (cloud[i].x <= -1528) cloud[i].x = width;
+  }
+  for (var i = 0; i < 2; i++) {
+    let speed = numRandom(12, 4);
+    let speedCar = numRandom(12, 4);
+    police[i].x = police[i].x - (i + speed) * 2;
+    if (police[i].x <= -128) police[i].x = width;
+    car[i].x = car[i].x - (i + speedCar) * 0.8;
+    if (car[i].x <= -128) car[i].x = width;
+    fireTruck[i].x = fireTruck[i].x - (i + speed) * 1.5;
+    if (fireTruck[i].x <= -228) fireTruck[i].x = width;
+  }
+  if (dino_walk.x < 1300) {
+    dino_walk.x += 2;
+  } else {
+    dino_walk.x = 20;
   }
 }
