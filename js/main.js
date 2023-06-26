@@ -317,7 +317,7 @@ function animate_clouds() {
     car[i].x = car[i].x - (i + speed) * 0.2;
     if (car[i].x <= -128) car[i].x = width;
   }
-  if (dino_walk.x < 1300) {
+  if (dino_walk.x <= width - 200) {
     dino_walk.x += 2;
   } else {
     dino_walk.x = 20;
