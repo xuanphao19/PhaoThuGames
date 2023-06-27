@@ -1,12 +1,9 @@
 ﻿"use strict";
-//  ---------------------------------------------------------------------------------
+//  ----------------------------------------------------------------------------
 //  Copyright (c) Microsoft Corporation.  All rights reserved.
 //https://learn.microsoft.com/en-us/samples/microsoft/windows-appsample-get-started-js2d/get-started-javascript-2d/?ns-enrollment-type=Collection&ns-enrollment-id=jg60cd0ox2z4nk
+//  -----------------------------------------------------------------------------
 
-//  ---------------------------------------------------------------------------------
-
-// The canvas and stage are where our sprites are displayed. The canvas is defined in
-// the index.html file, and the stage is an EaselJS object.
 var canvas, stage, loader;
 var width, height;
 var dino_walk, dino_stand, dino_lying;
@@ -37,12 +34,7 @@ const numRandom = function (a, b) {
     : Math.floor(Math.random() * a);
 };
 
-// This method is called to start the game.
-// It creates the various game objects, adds them to the stage, and kicks off
-// a gameLoop() called by a timer.
-
 init();
-
 function init() {
   canvas = document.getElementById("gameCanvas");
   stage = new createjs.Stage("gameCanvas");
@@ -50,10 +42,7 @@ function init() {
   sky.graphics.beginFill("DeepSkyBlue");
   grass = new createjs.Shape();
   grass.graphics.beginFill("green");
-
-  // Text to display the score and other messages.
   scoreText = new createjs.Text("Score: 00000", "42px Arial", "violet");
-
   // Add these objects to the stage so they are visible.
   stage.addChild(sky, grass, scoreText);
 
@@ -69,16 +58,12 @@ function init() {
     // <img src='../' alt='' fireTruck/>;
   ];
 
-  // Now we create a special queue, and finally a handler that is
-  // called when they are loaded. The queue object is provided by preloadjs.
   loader = new createjs.LoadQueue(false);
   loader.addEventListener("complete", loadingComplete);
   loader.loadManifest(manifest, true, "./images/");
 }
 
 function loadingComplete() {
-  // Images have been loaded at this point, so we can continue.
-  // Create some clouds to drift by..
   height = window.innerHeight;
   width = window.innerWidth;
   for (var i = 0; i < 3; i++) {
@@ -97,14 +82,18 @@ function loadingComplete() {
     fireTruck[i] = new createjs.Bitmap(loader.getResult("fireTruck"));
     fireTruck[i].x = Math.random() * 1224;
     fireTruck[i].y = height / 2 - 90 + i * 2;
+    // car[i].scale = Math.random() + 0.3;
+    // police[i].scale = Math.random() + 0.3;
+    // fireTruck[i].scale = Math.random() + 0.3;
+
     Mic21[i] = new createjs.Bitmap(loader.getResult("Mic21"));
+    Mic21[i].scale = Math.random() + 0.3;
     Mic21[i].x = Math.random() * 1224;
     Mic21[i].y = height / 2 - 290 + i * 2;
     stage.addChild(fireTruck[i], car[i], police[i], Mic21[i]);
   }
+  explosion = new createjs.Bitmap(loader.getResult("explosion"));
 
-  //  Define  the animated dino walk using a spritesheet of images,
-  // and also a standing still state, and a knocked-over state.
   var data = {
     images: [loader.getResult("dino")],
     frames: { width: 373, height: 256 },
@@ -120,7 +109,6 @@ function loadingComplete() {
       },
     },
   };
-
   var spriteSheet = new createjs.SpriteSheet(data);
   dino_walk = new createjs.Sprite(spriteSheet, "walk");
   dino_stand = new createjs.Sprite(spriteSheet, "stand");
@@ -128,19 +116,16 @@ function loadingComplete() {
   dino_lying.skewX = -50; // Make the dino lie down.
   stage.addChild(dino_walk, dino_stand, dino_lying);
 
-  // Create an obsticle the dino must jump over. explosion
+  // Create an obsticle the dino must jump over.
   barrel = new createjs.Bitmap(loader.getResult("barrel"));
-  // barrel.regX = 32;
-  // barrel.regY = 32;
-  barrel.x = width + 100; // Move the obstical to the edge of the screen, and a little further.
+  barrel.regX = 32;
+  barrel.regY = 32;
+  barrel.x = width + 100;
+
+  /* ================ */
   stage.addChild(barrel);
   /* ============= */
-
-  explosion = new createjs.Bitmap(loader.getResult("explosion"));
-
-  // Now position everything according to the current window dimensions.
   resizeGameWindow();
-
   // Set up the game loop and keyboard handler. nuclear explosion
   createjs.Ticker.timingMode = createjs.Ticker.RAF;
   createjs.Ticker.addEventListener("tick", gameLoop);
@@ -156,26 +141,19 @@ function resizeGameWindow() {
   canvas.width = width;
   canvas.height = height;
   stage.setBounds(0, 0, width, height);
-
   scoreText.y = 26;
-
   sky.graphics.drawRect(0, 0, width, height / 2);
   sky.x = 0;
   sky.y = 0;
-
   grass.graphics.drawRect(0, 0, width, height / 2);
   grass.x = 0;
   grass.y = height / 2;
-
   dino_walk.x = 20;
   dino_walk.y = height / 2 - 100;
-
   dino_stand.x = dino_walk.x;
   dino_stand.y = height / 2 - 100;
-
   dino_lying.x = dino_walk.x - 75;
   dino_lying.y = dino_walk.y + 75;
-
   barrel.y = height / 2 + 100;
 }
 
@@ -254,9 +232,18 @@ function jumpingDino() {
   }
 }
 
-function mouseClicked() {
+const mouseClicked = (e) => {
+  let scale = null;
+  if (e.rawY >= 300) {
+    scale = Math.random() * (e.rawY * 0.004) + 0.5;
+  } else {
+    scale = 1 * (e.rawY * 0.005);
+  }
+  scale = scale <= 0.4 ? 0.4 : scale;
+  nuclearExplosion(e, scale);
+  createjs.Sound.play(soundID);
   userDidSomething();
-}
+};
 
 function keyboardPressed(event) {
   if (event.keyCode == 32) {
@@ -279,10 +266,6 @@ function keyboardPressed(event) {
 
 function userDidSomething() {
   // This is called when the user either clicks with the mouse, or presses the Space Bar.
-  // if (score >= 40) {
-  //   window.location.reload();
-  // }
-
   if (GameState === GameStateEnum.Playing) {
     if (jumping == false) {
       createjs.Sound.play(soundID);
@@ -303,6 +286,7 @@ function animate_clouds() {
     cloud[i].x = cloud[i].x - i * `0.${i}`;
     if (cloud[i].x <= -1528) cloud[i].x = width;
   }
+
   for (var i = 0; i < 2; i++) {
     let speed = numRandom(18, 4);
     police[i].x = police[i].x - speed * 0.4 + i;
@@ -313,7 +297,7 @@ function animate_clouds() {
     if (car[i].x <= -228) car[i].x = width;
 
     Mic21[i].x = Mic21[i].x + (i + speed) * 0.04;
-    if (Mic21[i].y <= -50) {
+    if (Mic21[i].y <= -30) {
       Mic21[i].y = height / 2 - 300;
     } else {
       Mic21[i].y = Mic21[i].y - 0.03;
@@ -331,21 +315,11 @@ var soundID = "Thunder";
 function loadSound() {
   createjs.Sound.registerSound("./audio/machineGun.ogg", soundID);
 }
-document.addEventListener("click", (e) => {
-  let scale = null;
-  if (e.clientY >= 300) {
-    scale = Math.random() * (e.clientY * 0.004) + 0.5;
-  } else {
-    scale = 1 * (e.clientY * 0.005);
-  }
-  scale = scale <= 0.4 ? 0.4 : scale;
-  nuclearExplosion(e, scale);
-  createjs.Sound.play(soundID);
-});
+
 function nuclearExplosion(e, sca) {
   let tolerance = sca > 1 ? 15 : sca <= 0.5 ? 5 : 10;
-  explosion.x = e.clientX - sca * 32 - tolerance;
-  explosion.y = e.clientY - sca * 32 - tolerance;
+  explosion.x = e.rawX - sca * 32 - tolerance;
+  explosion.y = e.rawY - sca * 32 - tolerance;
   explosion.scale = sca;
   stage.addChild(explosion);
   var timer = setTimeout(() => {
