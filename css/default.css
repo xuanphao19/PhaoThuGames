@@ -1,5 +1,12 @@
 ﻿body {
-  /* Uncomment this to enable scrolling and zooming
+  /* Uncomment this to enable scrolling and zooming */
   touch-action: manipulation;
-  */
+  padding: 0;
+  margin: 0;
+  height: 100vdh !important;
+  overflow: hidden;
+}
+.gameCanvas {
+  height: 100vdh !important;
+  overflow: hidden;
 }

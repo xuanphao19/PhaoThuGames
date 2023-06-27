@@ -5,12 +5,28 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
     <link rel="shortcut icon" href="./favicon.ico" />
     <title>GetStarted JavaScript 2D Game Demo</title>
-    <script src="js/easeljs-0.8.2.min.js"></script>
+    <!-- <script src="js/easeljs-0.8.2.min.js"></script> -->
+    <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
+    <!-- <script src="https://code.createjs.com/1.0.0/tweenjs.min.js"></script> -->
     <script src="js/preloadjs-0.6.2.min.js"></script>
+    <style>
+      body {
+        touch-action: manipulation;
+        padding: 0;
+        margin: 0;
+        height: 100vdh !important;
+        overflow: hidden;
+      }
+    </style>
   </head>
   <body>
     <canvas id="gameCanvas"></canvas>
-    <audio src="./audio/effect_in.mp3"></audio>
     <script src="js/main.js"></script>
+    <!--  -->
   </body>
 </html>
+<!-- <iframe
+  width="100%"
+  height="800px"
+  src="https://codesandbox.io/embed/angry-hooks-ggmdql?fontsize=14&hidenavigation=1&theme=dark"
+></iframe> -->
