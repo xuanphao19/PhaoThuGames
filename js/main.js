@@ -4,20 +4,13 @@
 //https://learn.microsoft.com/en-us/samples/microsoft/windows-appsample-get-started-js2d/get-started-javascript-2d/?ns-enrollment-type=Collection&ns-enrollment-id=jg60cd0ox2z4nk
 //  -----------------------------------------------------------------------------
 
-var canvas, stage, loader;
-var width, height;
-var dino_walk, dino_stand, dino_lying;
-var sky, grass;
-var barrel,
-  explosion,
+var canvas, stage, loader, width, height, dx, dy, scoreText;
+var dino_walk, dino_stand, dino_lying, sky, grass, barrel, explosion;
+var car = [],
   cloud = [],
-  car = [],
-  fireTruck = [],
   Mic21 = [],
-  police = [];
-var scoreText;
-var dx,
-  dy,
+  police = [],
+  fireTruck = [],
   score = 0,
   jumping = false;
 
@@ -36,18 +29,28 @@ const numRandom = function (a, b) {
 
 init();
 function init() {
-  canvas = document.getElementById("gameCanvas");
-  stage = new createjs.Stage("gameCanvas");
+  canvas = document.getElementById("canvas");
+  stage = new createjs.Stage("canvas");
   sky = new createjs.Shape();
   sky.graphics.beginFill("DeepSkyBlue");
   grass = new createjs.Shape();
   grass.graphics.beginFill("green");
   scoreText = new createjs.Text("Score: 00000", "42px Arial", "violet");
+  scoreText.textAlign = "center";
   // Add these objects to the stage so they are visible.
   stage.addChild(sky, grass, scoreText);
 
+  /* ======================== */
+  var circle = new createjs.Shape();
+  circle.graphics.beginFill("#ff0000").drawCircle(0, 0, 35);
+  circle.x = 450;
+  circle.y = 100;
+  circle.margin = "auto";
+  stage.addChild(circle);
+  /* ======================== */
+
   var manifest = [
-    { src: "walkingDino.png", id: "dino" },
+    { src: "Games2.png", id: "dino" },
     { src: "barTrap.png", id: "barrel" },
     { src: "cloud-small.png", id: "cloud" },
     { src: "car.png", id: "car" },
@@ -66,12 +69,7 @@ function init() {
 function loadingComplete() {
   height = window.innerHeight;
   width = window.innerWidth;
-  for (var i = 0; i < 3; i++) {
-    cloud[i] = new createjs.Bitmap(loader.getResult("cloud"));
-    cloud[i].x = Math.random() * 524;
-    cloud[i].y = 64 + i * 28;
-    stage.addChild(cloud[i]);
-  }
+
   for (var i = 0; i < 2; i++) {
     car[i] = new createjs.Bitmap(loader.getResult("car"));
     car[i].x = Math.random() * 1524;
@@ -82,9 +80,7 @@ function loadingComplete() {
     fireTruck[i] = new createjs.Bitmap(loader.getResult("fireTruck"));
     fireTruck[i].x = Math.random() * 1224;
     fireTruck[i].y = height / 2 - 90 + i * 2;
-    // car[i].scale = Math.random() + 0.3;
-    // police[i].scale = Math.random() + 0.3;
-    // fireTruck[i].scale = Math.random() + 0.3;
+    car[i].scale = Math.random() + 0.3;
 
     Mic21[i] = new createjs.Bitmap(loader.getResult("Mic21"));
     Mic21[i].scale = Math.random() + 0.3;
@@ -92,11 +88,22 @@ function loadingComplete() {
     Mic21[i].y = height / 2 - 290 + i * 2;
     stage.addChild(fireTruck[i], car[i], police[i], Mic21[i]);
   }
+
+  for (var i = 0; i < 3; i++) {
+    cloud[i] = new createjs.Bitmap(loader.getResult("cloud"));
+    cloud[i].setTransform(0, 64, 1.3, 1);
+    cloud[i].alpha = cloud[i].y / 120;
+    if (i === 1 || i === 2) {
+      cloud[i].setTransform(Math.random() * 200, numRandom(100, 5), 1.8, 1.8);
+      cloud[i].alpha = 0.3;
+    }
+    stage.addChild(cloud[i]);
+  }
   explosion = new createjs.Bitmap(loader.getResult("explosion"));
 
   var data = {
     images: [loader.getResult("dino")],
-    frames: { width: 373, height: 256 },
+    frames: { width: 37, height: 28 },
     animations: {
       stand: 0,
       lying: {
@@ -104,11 +111,13 @@ function loadingComplete() {
         speed: 0.1,
       },
       walk: {
-        frames: [0, 1, 2, 3, 2, 1],
-        speed: 0.4,
+        frames: [0, 1, 2, 3, 0, 1, 2, 3],
+        speed: 0.1,
       },
     },
   };
+  // data.images[0].naturalWidth = 80;
+  // data.images[0].naturalHeight = 32;
   var spriteSheet = new createjs.SpriteSheet(data);
   dino_walk = new createjs.Sprite(spriteSheet, "walk");
   dino_stand = new createjs.Sprite(spriteSheet, "stand");
@@ -131,7 +140,7 @@ function loadingComplete() {
   createjs.Ticker.addEventListener("tick", gameLoop);
   document.onkeydown = keyboardPressed;
   stage.on("stagemousedown", mouseClicked);
-
+  //
   window.addEventListener("resize", resizeGameWindow);
 }
 
@@ -148,10 +157,10 @@ function resizeGameWindow() {
   grass.graphics.drawRect(0, 0, width, height / 2);
   grass.x = 0;
   grass.y = height / 2;
-  dino_walk.x = 20;
-  dino_walk.y = height / 2 - 100;
+  dino_walk.x = -50;
+  dino_walk.y = height / 2 - 20;
   dino_stand.x = dino_walk.x;
-  dino_stand.y = height / 2 - 100;
+  dino_stand.y = height / 2 - 20;
   dino_lying.x = dino_walk.x - 75;
   dino_lying.y = dino_walk.y + 75;
   barrel.y = height / 2 + 100;
@@ -164,11 +173,12 @@ function gameLoop() {
 
     case GameStateEnum.Ready: {
       // This is the 'get ready to play' screen.
-      scoreText.x = width / 2 - 150;
+      scoreText.x = width / 2;
       scoreText.text = "Gamer Xuân Pháo!";
       barrel.x = width + 100;
       jumping = false;
-      dino_walk.y = height / 2 - 100;
+      dino_walk.y = height / 2 - 20;
+
       score = 0;
       dino_stand.visible = true;
       dino_walk.visible = false;
@@ -181,7 +191,7 @@ function gameLoop() {
       dino_stand.visible = false;
       dino_walk.visible = true;
       // Display the score
-      scoreText.x = width / 2 - 100;
+      scoreText.x = width / 2;
       scoreText.text = "Qua cửa: " + score.toString();
       // Move the obsticle across the screen, rolling as it goes.
       barrel.rotation = barrel.x;
@@ -204,7 +214,7 @@ function gameLoop() {
     // case GameStateEnum.GameOver: {
     // dino_walk.visible = false;
     // dino_lying.visible = true;
-    // scoreText.x = width / 2 - 220;
+    // scoreText.x = width / 2;
     // scoreText.text = "Thôi chết em rồi. Cửa tử: " + score.toString();
     // break;
     // }
@@ -224,15 +234,34 @@ function jumpingDino() {
       if (dy > -2) dy = 2;
     } else {
       dy = dy * 1.2;
-      if (dino_walk.y > height / 2 - 100) {
+      if (dino_walk.y > height / 2 - 20) {
         jumping = false;
-        dino_walk.y = height / 2 - 100;
+        dino_walk.y = height / 2 - 20;
       }
     }
   }
 }
+// document.addEventListener("click", function (e) {
+//   console.log(e, e.which);
+// });
+var mouseClicked = (e) => {
+  console.log(e, e.eventPhase);
 
-const mouseClicked = (e) => {
+  // e.currentTarget.children[0].alpha = 0; // sky
+  // e.currentTarget.children[1].alpha = 0; // GROUND
+  // e.currentTarget.children[2].alpha = 0; // scoreText
+  // e.currentTarget.children[3].alpha = 0; // Sun goddess
+  // e.currentTarget.children[4].alpha = 0; // Cứu hỏa 1!
+  // e.currentTarget.children[5].alpha = 0; // Car !1!
+  // e.currentTarget.children[6].alpha = 0; //  Cảnh sát dởm 1!
+  // e.currentTarget.children[7].alpha = 0;  // Mic21 !1!
+  e.currentTarget.children[8].alpha = 0; //  Cứu hỏa 2!
+  e.currentTarget.children[9].alpha = 0; // Car !2!
+  e.currentTarget.children[10].alpha = 0; //  Cảnh sát dởm 2!
+  // e.currentTarget.children[11].alpha = 0; // Mic21 !2!
+  // e.currentTarget.children[12].alpha = 0; // Mây mưa 1!
+  e.currentTarget.children[13].alpha = 0; // Mây mưa 2!
+  // e.currentTarget.children[14].alpha = 0; // Mây mưa 2!
   let scale = null;
   if (e.rawY >= 300) {
     scale = Math.random() * (e.rawY * 0.004) + 0.5;
@@ -255,13 +284,6 @@ function keyboardPressed(event) {
     }
     userDidSomething();
   }
-  if (event.keyCode == 37) {
-    if (dino_walk.x > 20) {
-      dino_walk.x -= 20;
-    } else {
-      dino_walk.x = 20;
-    }
-  }
 }
 
 function userDidSomething() {
@@ -270,7 +292,7 @@ function userDidSomething() {
     if (jumping == false) {
       createjs.Sound.play(soundID);
       jumping = true;
-      dy = -32;
+      dy = -12;
     }
   }
   if (GameState == GameStateEnum.Ready) {
@@ -286,7 +308,6 @@ function animate_clouds() {
     cloud[i].x = cloud[i].x - i * `0.${i}`;
     if (cloud[i].x <= -1528) cloud[i].x = width;
   }
-
   for (var i = 0; i < 2; i++) {
     let speed = numRandom(18, 4);
     police[i].x = police[i].x - speed * 0.4 + i;
@@ -304,10 +325,10 @@ function animate_clouds() {
     }
     if (Mic21[i].x >= width) Mic21[i].x = 0;
   }
-  if (dino_walk.x <= width - 200) {
-    dino_walk.x += 2;
+  if (dino_walk.x > 20) {
+    dino_walk.x -= 2;
   } else {
-    dino_walk.x = 20;
+    dino_walk.x = width - 20;
   }
 }
 
